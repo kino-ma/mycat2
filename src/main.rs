@@ -1,21 +1,20 @@
-fn main() {
+use std::io::{self, Write, Read};
+
+fn main() -> io::Result<()> {
     use std::env;
-    use std::io::{self, Write};
     use std::fs;
 
     let args: Vec<String> = env::args().collect();
 
     let mut stdout = io::stdout();
 
-    for file in &args[1..] {
-        let content = match fs::read_to_string(file) {
-            Ok(content) => content,
-            Err(error) => {
-                println!("read {} failed: {}", file, error);
-                continue;
-            }
-        };
+    let mut buffer: Vec<u8> = Vec::new();
 
-        stdout.write_all(&content.into_bytes()).unwrap();
+    for file in &args[1..] {
+        let mut f = fs::File::open(file)?;
+        f.read_to_end(&mut buffer)?;
+
+        stdout.write_all(&buffer)?;
     }
+    Ok(())
 }
